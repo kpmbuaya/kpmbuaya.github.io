@@ -3,48 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebView Test</title>
+    <title>iOS WebView Test by @algoreadme (iframe)</title>
     <style>
         body {
             font-family: -apple-system, system-ui, BlinkMacSystemFont;
-            max-width: 800px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .nav-button {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 12px 24px;
             margin: 5px;
             background-color: #007AFF;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.3s;
         }
         .content {
             margin-top: 20px;
             padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <div id="navigation">
-        <a href="?action=homepage" class="nav-button">Homepage</a>
-        <a href="?action=login" class="nav-button">Login</a>
-        <a href="?action=verification" class="nav-button">Verification</a>
-        <a href="?action=approved" class="nav-button">Approved</a>
-    </div>
-    
-    <div class="content" id="content">
-        Loading...
+    <div class="container">
+        <div id="navigation">
+            <a href="?action=homepage" class="nav-button">Homepage</a>
+            <a href="?action=login" class="nav-button">Login</a>
+            <a href="?action=verification" class="nav-button">Verification</a>
+            <a href="?action=approved&orderId=123" class="nav-button">Approved</a>
+        </div>
+        
+        <div class="content" id="content">
+            Loading...
+        </div>
     </div>
 
     <script>
+        function notifyNative(action, url) {
+            // Notify parent (WebView) about URL change
+            window.webkit?.messageHandlers?.urlObserver?.postMessage({
+                action: action,
+                url: url
+            });
+
+            // Also notify parent window if inside iframe
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    action: action,
+                    url: url
+                }, '*');
+            }
+        }
+
         function updateContent() {
             const urlParams = new URLSearchParams(window.location.search);
             const action = urlParams.get('action') || 'homepage';
             const content = document.getElementById('content');
+            
+            // Notify about URL change
+            notifyNative(action, window.location.href);
             
             switch(action) {
                 case 'homepage':
@@ -57,7 +86,8 @@
                     content.innerHTML = '<h2>Verification Page</h2><p>Please verify your account.</p>';
                     break;
                 case 'approved':
-                    content.innerHTML = '<h2>Approved Page</h2><p>Your account has been approved!</p>';
+                    const orderId = urlParams.get('orderId');
+                    content.innerHTML = `<h2>Approved Page</h2><p>Order ID: ${orderId}</p>`;
                     break;
                 default:
                     content.innerHTML = '<h2>404</h2><p>Page not found</p>';
@@ -69,6 +99,16 @@
 
         // Update content when using browser back/forward buttons
         window.onpopstate = updateContent;
+
+        // Listen for clicks on navigation links
+        document.getElementById('navigation').addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                const href = e.target.getAttribute('href');
+                window.history.pushState({}, '', href);
+                updateContent();
+            }
+        });
     </script>
 </body>
 </html>
