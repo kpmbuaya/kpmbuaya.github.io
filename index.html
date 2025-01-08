@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebView Test</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007AFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .content {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation">
+        <a href="?action=homepage" class="nav-button">Homepage</a>
+        <a href="?action=login" class="nav-button">Login</a>
+        <a href="?action=verification" class="nav-button">Verification</a>
+        <a href="?action=approved" class="nav-button">Approved</a>
+    </div>
+    
+    <div class="content" id="content">
+        Loading...
+    </div>
+
+    <script>
+        function updateContent() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action') || 'homepage';
+            const content = document.getElementById('content');
+            
+            switch(action) {
+                case 'homepage':
+                    content.innerHTML = '<h2>Homepage</h2><p>Welcome to the test website!</p>';
+                    break;
+                case 'login':
+                    content.innerHTML = '<h2>Login Page</h2><p>This is the login page.</p>';
+                    break;
+                case 'verification':
+                    content.innerHTML = '<h2>Verification Page</h2><p>Please verify your account.</p>';
+                    break;
+                case 'approved':
+                    content.innerHTML = '<h2>Approved Page</h2><p>Your account has been approved!</p>';
+                    break;
+                default:
+                    content.innerHTML = '<h2>404</h2><p>Page not found</p>';
+            }
+        }
+
+        // Update content on page load
+        updateContent();
+
+        // Update content when using browser back/forward buttons
+        window.onpopstate = updateContent;
+    </script>
+</body>
+</html>
