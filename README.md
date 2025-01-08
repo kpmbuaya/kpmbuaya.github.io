@@ -1,2 +1,0 @@
-# kpmbuaya.github.io
-DeveloperTest
